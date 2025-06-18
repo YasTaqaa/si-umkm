@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth } from '@/lib/auth/firebase'
 import { useRouter } from 'next/navigation'
-import Navbar from '../navbar/page'
+import Navbar from '@/app/components/Navbar'
 
 export default function LoginPage() {
   const router = useRouter()

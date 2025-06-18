@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import Navbar from '@/app/navbar/page'
+import Navbar from '@/app/components/Navbar'
 
 export default function UmkmDashboard() {
   const router = useRouter()

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/auth/firebase'
 import Link from 'next/link'
-import Navbar from '../navbar/page'
+import Navbar from '@/app/components/Navbar'
 
 export default function RegisterPage() {
   const router = useRouter()

@@ -7,8 +7,9 @@ export const typeDefs = gql`
   type Product {
     _id: ID!
     nama: String!
-    kategori: String!
+    deskripsi: String
     harga: Int!
+    gambar: String
   }
 
   type Query {
@@ -19,8 +20,9 @@ export const typeDefs = gql`
 
   input ProductInput {
     nama: String!
-    kategori: String!
+    deskripsi: String
     harga: Int!
+    gambar: String
   }
 
   type Mutation {
@@ -34,7 +36,12 @@ export const resolvers = {
   Query: {
     searchProduct: async (_: any, { keyword }: { keyword: string }) => {
       const regex = new RegExp(keyword, 'i')
-      return await Product.find({ nama: { $regex: regex } })
+      return await Product.find({
+        $or: [
+          { nama: { $regex: regex } },
+          { deskripsi: { $regex: regex } },
+        ],
+      })
     },
     getAllProducts: async () => {
       return await Product.find()
@@ -57,3 +64,4 @@ export const resolvers = {
     },
   },
 }
+

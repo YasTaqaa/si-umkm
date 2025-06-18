@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client'
 
-import Navbar from './navbar/page'
+import Navbar from './components/Navbar'
 import ProductList from './components/productlist'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'

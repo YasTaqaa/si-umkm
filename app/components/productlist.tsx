@@ -5,6 +5,20 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { gql } from '@apollo/client'
+import client from '@/lib/apollo/client'
+
+const SEARCH_PRODUCTS = gql`
+  query SearchProducts($keyword: String!) {
+    searchProduct(keyword: $keyword) {
+      _id
+      nama
+      deskripsi
+      harga
+      gambar
+    }
+  }
+`
 
 export default function ProductList() {
   const [products, setProducts] = useState<any[]>([])
@@ -15,15 +29,11 @@ export default function ProductList() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('/api/rest/products')
-        const data = await res.json()
-        const filtered = query
-          ? data.filter((p: any) =>
-              p.nama?.toLowerCase().includes(query) ||
-              p.deskripsi?.toLowerCase().includes(query)
-            )
-          : data
-        setProducts(filtered)
+        const { data } = await client.query({
+          query: SEARCH_PRODUCTS,
+          variables: { keyword: query },
+        })
+        setProducts(data.searchProduct)
       } catch (err) {
         console.error('Gagal mengambil data produk:', err)
       } finally {
