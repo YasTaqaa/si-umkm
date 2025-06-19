@@ -1,20 +1,26 @@
 // app/api/rest/trainings/[id]/route.ts
+
 import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: string } } // ✅ parameter context harus ditulis begini
+) {
   const user = await getUserFromRequest(req)
+
   if (!user || user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
     await connectDB()
-    const training = await Training.findByIdAndDelete(params.id)
 
-    if (!training) {
+    const deletedTraining = await Training.findByIdAndDelete(context.params.id)
+
+    if (!deletedTraining) {
       return NextResponse.json({ error: 'Pelatihan tidak ditemukan' }, { status: 404 })
     }
 
