@@ -5,13 +5,13 @@ import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
 
-// ⬅️ WAJIB untuk mendukung dynamic route handler
 export const dynamic = 'force-dynamic'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } } // ⬅️ inline destructure, TANPA type alias
+  context: { params: { id: string } } // ✅ jangan gunakan `Record`, jangan pakai type alias
 ) {
+  const { id } = context.params
   const user = await getUserFromRequest(req)
 
   if (!user || user.role !== 'admin') {
@@ -21,15 +21,14 @@ export async function DELETE(
   try {
     await connectDB()
 
-    const deletedTraining = await Training.findByIdAndDelete(params.id)
-
-    if (!deletedTraining) {
+    const deleted = await Training.findByIdAndDelete(id)
+    if (!deleted) {
       return NextResponse.json({ error: 'Pelatihan tidak ditemukan' }, { status: 404 })
     }
 
-    return NextResponse.json({ message: 'Berhasil dihapus' }, { status: 200 })
+    return NextResponse.json({ message: 'Berhasil dihapus' })
   } catch (err) {
-    console.error('Gagal menghapus pelatihan:', err)
+    console.error(err)
     return NextResponse.json({ error: 'Gagal menghapus pelatihan' }, { status: 500 })
   }
 }
