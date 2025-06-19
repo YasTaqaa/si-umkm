@@ -14,10 +14,15 @@ export async function POST(req: NextRequest) {
   if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
     const token = signToken({ email, role: 'admin' })
 
-    const response = NextResponse.json({ message: 'Login berhasil' })
+    const response = NextResponse.json({
+      message: 'Login berhasil',
+      email: ADMIN_USER.email,
+      role: ADMIN_USER.role,
+    })
+
     response.cookies.set('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // ⬅️ Aman di production
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 2, // 2 jam
       path: '/',
       sameSite: 'lax',

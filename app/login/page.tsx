@@ -2,10 +2,14 @@
 'use client'
 
 import { useState } from 'react'
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth } from '@/lib/auth/firebase'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth'
+import { auth } from '@/lib/auth/firebase'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,44 +17,61 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'umkm' | 'admin'>('umkm')
 
+  // 🔐 LOGIN ADMIN
   const handleAdminLogin = async () => {
     try {
       const res = await fetch('/api/rest/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ⬅️ agar cookie HttpOnly disimpan
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
       })
 
       if (res.ok) {
-        setTimeout(() => {
-          router.push('/dashboard/admin')
-        }, 300)
+        const data = await res.json()
+
+        // ✅ Simpan user ke localStorage agar dikenali oleh frontend (Navbar, dashboard, dll)
+        localStorage.setItem('user', JSON.stringify({
+          email: data.email,
+          role: data.role,
+        }))
+
+        router.push('/dashboard/admin')
       } else {
-        alert('Login admin gagal')
+        alert('Login admin gagal. Email atau password salah.')
       }
-    } catch (error) {
-      console.error('Login error:', error)
-      alert('Terjadi kesalahan saat login')
+    } catch (err) {
+      console.error('Error saat login admin:', err)
+      alert('Terjadi kesalahan saat login admin.')
     }
   }
 
+  // 🙋‍♂️ LOGIN UMKM via Firebase Email/Password
   const handleUmkmLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      localStorage.setItem('user', JSON.stringify({
+        email: result.user.email,
+        role: 'umkm',
+      }))
       router.push('/dashboard/umkm')
     } catch {
-      alert('Login UMKM gagal')
+      alert('Login UMKM gagal. Periksa email dan password.')
     }
   }
 
+  // 🔓 LOGIN GOOGLE untuk UMKM
   const loginWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      localStorage.setItem('user', JSON.stringify({
+        email: result.user.email,
+        role: 'umkm',
+      }))
       router.push('/dashboard/umkm')
     } catch {
-      alert('Login Google gagal')
+      alert('Login Google gagal.')
     }
   }
 
@@ -61,13 +82,14 @@ export default function LoginPage() {
         <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8 space-y-6">
           <h1 className="text-2xl font-bold text-green-700 text-center">Masuk ke Akun</h1>
 
-          {/* Role selector */}
+          {/* Pilih Role */}
           <div>
             <label htmlFor="role-select" className="block mb-1 text-sm font-medium text-gray-700">
               Masuk sebagai
             </label>
             <select
               id="role-select"
+              value={role}
               onChange={(e) => setRole(e.target.value as 'umkm' | 'admin')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 text-black"
             >
@@ -92,7 +114,7 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {/* Login button */}
+          {/* Tombol Login */}
           <button
             onClick={role === 'admin' ? handleAdminLogin : handleUmkmLogin}
             className="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition"
@@ -100,7 +122,7 @@ export default function LoginPage() {
             Login sebagai {role.toUpperCase()}
           </button>
 
-          {/* Google login */}
+          {/* Login Google hanya untuk UMKM */}
           {role === 'umkm' && (
             <button
               onClick={loginWithGoogle}
@@ -110,7 +132,7 @@ export default function LoginPage() {
             </button>
           )}
 
-          {/* Link register */}
+          {/* Link ke halaman Register */}
           <p className="text-center text-sm text-gray-600">
             Belum punya akun?{' '}
             <a href="/register" className="text-green-700 hover:underline font-medium">

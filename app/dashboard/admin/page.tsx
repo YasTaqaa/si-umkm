@@ -1,23 +1,36 @@
+// app/dashboard/admin/page.tsx
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import Navbar from '@/app/components/Navbar'
 import { useRouter } from 'next/navigation'
+import Navbar from '@/app/components/Navbar'
+import Link from 'next/link'
 
 export default function AdminDashboard() {
+  const router = useRouter()
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthorized, setIsAuthorized] = useState(false)
+
   const [umkmCount, setUmkmCount] = useState(0)
   const [productCount, setProductCount] = useState(0)
   const [trainingCount, setTrainingCount] = useState(0)
 
-  const router = useRouter()
+  // ✅ Cek otorisasi dari localStorage (tanpa kondisi pemanggilan hook)
+  useEffect(() => {
+    const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null
+    const parsed = userStr ? JSON.parse(userStr) : null
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('email')
-    router.push('/login')
-  }
+    if (parsed?.role === 'admin') {
+      setIsAuthorized(true)
+    } else {
+      router.replace('/login')
+    }
 
+    setIsLoading(false)
+  }, [router])
+
+  // ✅ Ambil data statistik hanya jika admin valid
   useEffect(() => {
     const fetchCounts = async () => {
       try {
@@ -39,8 +52,24 @@ export default function AdminDashboard() {
       }
     }
 
-    fetchCounts()
-  }, [])
+    if (isAuthorized) {
+      fetchCounts()
+    }
+  }, [isAuthorized])
+
+  const handleLogout = () => {
+    localStorage.clear()
+    router.push('/login')
+  }
+
+  // ✅ Loading state sebelum otorisasi selesai
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Memuat dashboard admin...</p>
+      </main>
+    )
+  }
 
   return (
     <>
