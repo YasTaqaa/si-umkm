@@ -1,14 +1,19 @@
 // app/api/rest/trainings/[id]/route.ts
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
-import type { NextRequest as NextRequestType } from 'next/server'
+
+type ContextType = {
+  params: {
+    id: string
+  }
+}
 
 export async function DELETE(
-  req: NextRequestType,
-  context: { params: { id: string } }
+  req: NextRequest,
+  { params }: ContextType
 ) {
   const user = await getUserFromRequest(req)
 
@@ -19,7 +24,7 @@ export async function DELETE(
   try {
     await connectDB()
 
-    const deletedTraining = await Training.findByIdAndDelete(context.params.id)
+    const deletedTraining = await Training.findByIdAndDelete(params.id)
 
     if (!deletedTraining) {
       return NextResponse.json({ error: 'Pelatihan tidak ditemukan' }, { status: 404 })
