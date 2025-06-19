@@ -1,13 +1,14 @@
 // app/api/rest/trainings/[id]/route.ts
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
+import type { NextRequest as NextRequestType } from 'next/server'
 
 export async function DELETE(
-  req: NextRequest,
-  context: { params: { id: string } } // ✅ parameter context harus ditulis begini
+  req: NextRequestType,
+  context: { params: { id: string } }
 ) {
   const user = await getUserFromRequest(req)
 
