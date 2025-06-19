@@ -17,5 +17,11 @@ const handler = startServerAndCreateNextHandler<NextRequest>(server, {
   },
 })
 
-export const GET = handler
-export const POST = handler
+// ✅ Perbaiki sini: return type → Promise<Response>
+export async function GET(req: NextRequest): Promise<Response> {
+  return handler(req)
+}
+
+export async function POST(req: NextRequest): Promise<Response> {
+  return handler(req)
+}
