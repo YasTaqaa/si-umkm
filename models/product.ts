@@ -1,12 +1,21 @@
 // modules/product.ts
-import mongoose from 'mongoose'
+import { Schema, Document, model, models } from 'mongoose'
 
-const ProductSchema = new mongoose.Schema({
-  nama: String,
-  deskripsi: String,
-  harga: Number,
-  gambar: String,
-  emailUser: String,
+export interface IProduct extends Document {
+  nama: string
+  deskripsi: string
+  harga: number
+  gambar: string
+  emailUser: string
+  rating: number
+}
+
+const ProductSchema = new Schema<IProduct>({
+  nama: { type: String, required: true },
+  deskripsi: { type: String, required: true },
+  harga: { type: Number, required: true },
+  gambar: { type: String, required: true },
+  emailUser: { type: String, required: true },
   rating: {
     type: Number,
     default: 0,
@@ -15,4 +24,4 @@ const ProductSchema = new mongoose.Schema({
   },
 })
 
-export default mongoose.models.Product || mongoose.model('Product', ProductSchema)
+export default models.Product || model<IProduct>('Product', ProductSchema)
