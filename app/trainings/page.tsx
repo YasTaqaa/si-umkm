@@ -2,26 +2,26 @@
 // app/trainings/page.tsx
 export const dynamic = 'force-dynamic'
 
-import { headers } from 'next/headers'
 import Navbar from '@/app/components/Navbar'
 
-// Ekstrak embed URL dari link YouTube
+// Ekstrak embed URL dari link YouTube biasa
 function extractYouTubeEmbedUrl(url: string): string | null {
   if (!url || typeof url !== 'string') return null
-  const regex = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const regex =
+    /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regex)
   const videoId = match && match[1].length === 11 ? match[1] : null
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null
 }
 
-// Fetch data pelatihan
+// Ambil data pelatihan dari API
 async function getTrainings() {
-  try {
-    const headersList = headers()
-    const host = (await headersList).get('host')
-    const protocol = host?.includes('localhost') ? 'http' : 'https'
-    const baseUrl = `${protocol}://${host}`
+  const baseUrl =
+    typeof window === 'undefined'
+      ? process.env.NEXT_PUBLIC_BASE_URL || 'https://si-umkm.vercel.app'
+      : ''
 
+  try {
     const res = await fetch(`${baseUrl}/api/rest/trainings`, {
       cache: 'no-store',
     })
@@ -39,7 +39,7 @@ async function getTrainings() {
   }
 }
 
-// Komponen halaman pelatihan
+// Komponen utama halaman pelatihan
 export default async function TrainingListPage() {
   const trainings = await getTrainings()
 

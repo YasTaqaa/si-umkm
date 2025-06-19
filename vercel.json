@@ -1,0 +1,14 @@
+{
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "headers": {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,OPTIONS,POST,PUT,DELETE",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        },
+        "continue": true
+      }
+    ]
+  }
+  
