@@ -1,28 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/trainings/page.tsx
+export const dynamic = 'force-dynamic'
 
+import { headers } from 'next/headers'
 import Navbar from '@/app/components/Navbar'
 
-// Ekstrak embed URL dari link YouTube biasa
+// Ekstrak embed URL dari link YouTube
 function extractYouTubeEmbedUrl(url: string): string | null {
   if (!url || typeof url !== 'string') return null
-  const regex =
-    /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const regex = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regex)
   const videoId = match && match[1].length === 11 ? match[1] : null
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null
 }
 
-// Fungsi ambil data pelatihan, aman untuk SSR & Vercel
+// Fetch data pelatihan
 async function getTrainings() {
-  const baseUrl =
-    typeof window === 'undefined'
-      ? process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000'
-      : ''
-
   try {
+    const headersList = headers()
+    const host = (await headersList).get('host')
+    const protocol = host?.includes('localhost') ? 'http' : 'https'
+    const baseUrl = `${protocol}://${host}`
+
     const res = await fetch(`${baseUrl}/api/rest/trainings`, {
       cache: 'no-store',
     })
@@ -40,7 +39,7 @@ async function getTrainings() {
   }
 }
 
-// Komponen utama halaman pelatihan
+// Komponen halaman pelatihan
 export default async function TrainingListPage() {
   const trainings = await getTrainings()
 
