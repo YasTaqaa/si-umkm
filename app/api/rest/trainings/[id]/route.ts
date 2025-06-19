@@ -5,18 +5,12 @@ import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
 
-// ⬅️ Tambahkan ini agar Vercel tahu ini route dinamis
+// ⬅️ WAJIB untuk mendukung dynamic route handler
 export const dynamic = 'force-dynamic'
-
-type ContextType = {
-  params: {
-    id: string
-  }
-}
 
 export async function DELETE(
   req: NextRequest,
-  { params }: ContextType
+  { params }: { params: { id: string } } // ⬅️ inline destructure, TANPA type alias
 ) {
   const user = await getUserFromRequest(req)
 
