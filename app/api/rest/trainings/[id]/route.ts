@@ -1,24 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/rest/trainings/[id]/route.ts
+import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
-import { NextRequest, NextResponse } from 'next/server'
+import { getUserFromRequest } from '@/lib/auth/middleware'
 
-export async function GET(_: any, { params }: { params: { id: string } }) {
-  await connectDB()
-  const training = await Training.findById(params.id)
-  return NextResponse.json(training)
-}
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const user = await getUserFromRequest(req)
+  if (!user || user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  await connectDB()
-  const data = await req.json()
-  const updated = await Training.findByIdAndUpdate(params.id, data, { new: true })
-  return NextResponse.json(updated)
-}
+  try {
+    await connectDB()
+    const training = await Training.findByIdAndDelete(params.id)
 
-export async function DELETE(_: any, { params }: { params: { id: string } }) {
-  await connectDB()
-  await Training.findByIdAndDelete(params.id)
-  return NextResponse.json({ message: 'Deleted' })
+    if (!training) {
+      return NextResponse.json({ error: 'Pelatihan tidak ditemukan' }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: 'Berhasil dihapus' }, { status: 200 })
+  } catch (err) {
+    console.error('Gagal menghapus pelatihan:', err)
+    return NextResponse.json({ error: 'Gagal menghapus pelatihan' }, { status: 500 })
+  }
 }

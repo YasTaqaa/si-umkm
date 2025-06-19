@@ -31,12 +31,20 @@ export default function Navbar() {
 
         <div className="flex gap-2 items-center">
           {user ? (
-            <Link
-              href={dashboardPath}
-              className="text-green-600 font-semibold hover:underline"
-            >
-              🏠 Kembali ke Dashboard
-            </Link>
+            <>
+              <Link
+                href="/trainings"
+                className="text-blue-600 font-semibold hover:underline"
+              >
+                🎓 Pelatihan
+              </Link>
+              <Link
+                href={dashboardPath}
+                className="text-green-600 font-semibold hover:underline"
+              >
+                🏠 Dashboard
+              </Link>
+            </>
           ) : (
             <>
               <Link

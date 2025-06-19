@@ -1,11 +1,12 @@
 // models/training.ts
+
 import mongoose from 'mongoose'
 
 const trainingSchema = new mongoose.Schema({
-  judul: String,
-  deskripsi: String,
-  tanggal: Date,
-  pemateri: String,
+  title: { type: String, required: true },
+  description: String,
+  youtubeUrl: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
 })
 
 export default mongoose.models.Training || mongoose.model('Training', trainingSchema)
