@@ -5,6 +5,9 @@ import { connectDB } from '@/lib/db/connectDB'
 import Training from '@/models/training'
 import { getUserFromRequest } from '@/lib/auth/middleware'
 
+// ⬅️ Tambahkan ini agar Vercel tahu ini route dinamis
+export const dynamic = 'force-dynamic'
+
 type ContextType = {
   params: {
     id: string
