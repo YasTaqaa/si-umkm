@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/trainings/page.tsx
-// app/trainings/page.tsx
-export const dynamic = 'force-dynamic'
+'use client'
 
-import { headers } from 'next/headers'
+import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
 
 // Ekstrak embed URL dari link YouTube
@@ -15,34 +14,23 @@ function extractYouTubeEmbedUrl(url: string): string | null {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : null
 }
 
-// Fetch data pelatihan
-async function getTrainings() {
-  try {
-    const headersList = headers()
-    const host = (await headersList).get('host')
-    const protocol = host?.includes('localhost') ? 'http' : 'https'
-    const baseUrl = `${protocol}://${host}`
+export default function TrainingListPage() {
+  const [trainings, setTrainings] = useState([])
 
-    const res = await fetch(`${baseUrl}/api/rest/trainings`, {
-      cache: 'no-store',
-    })
-
-    if (!res.ok) {
-      const errorText = await res.text()
-      console.error('❌ Gagal fetch trainings:', res.status, errorText)
-      return []
+  useEffect(() => {
+    const fetchTrainings = async () => {
+      try {
+        const res = await fetch('/api/rest/trainings')
+        if (!res.ok) throw new Error('Gagal fetch')
+        const data = await res.json()
+        setTrainings(data)
+      } catch (err) {
+        console.error('❌ Gagal mengambil data pelatihan:', err)
+      }
     }
 
-    return res.json()
-  } catch (err) {
-    console.error('❌ Error fetch trainings:', err)
-    return []
-  }
-}
-
-// Komponen halaman pelatihan
-export default async function TrainingListPage() {
-  const trainings = await getTrainings()
+    fetchTrainings()
+  }, [])
 
   return (
     <>
@@ -53,10 +41,9 @@ export default async function TrainingListPage() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {trainings && trainings.length > 0 ? (
+          {trainings.length > 0 ? (
             trainings.map((training: any) => {
               const embedUrl = extractYouTubeEmbedUrl(training.youtubeUrl)
-
               return (
                 <div
                   key={training._id}
