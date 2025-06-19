@@ -6,6 +6,7 @@ const ProductSchema = new mongoose.Schema({
   deskripsi: String,
   harga: Number,
   gambar: String,
+  emailUser: String,
   rating: {
     type: Number,
     default: 0,

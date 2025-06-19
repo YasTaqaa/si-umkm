@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/rest/products/route.ts
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db/connectDB'
 import Product from '@/models/product'
 import { IncomingForm, File as FormidableFile } from 'formidable'
@@ -21,10 +21,12 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// GET: Ambil semua produk
-export async function GET() {
+// GET: Ambil semua produk, atau berdasarkan email
+export async function GET(req: NextRequest) {
   await connectDB()
-  const products = await Product.find()
+  const email = req.nextUrl.searchParams.get('email')
+  const filter = email ? { emailUser: email } : {}
+  const products = await Product.find(filter)
   return NextResponse.json(products)
 }
 
@@ -65,11 +67,11 @@ export async function POST(req: Request) {
       }
 
       try {
-        // Fix: Ambil nilai pertama jika array, karena Formidable bisa kembalikan array
         const nama = Array.isArray(fields.nama) ? fields.nama[0] : fields.nama
         const deskripsi = Array.isArray(fields.deskripsi) ? fields.deskripsi[0] : fields.deskripsi
         const hargaRaw = Array.isArray(fields.harga) ? fields.harga[0] : fields.harga
         const harga = Number(hargaRaw)
+        const emailUser = Array.isArray(fields.emailUser) ? fields.emailUser[0] : fields.emailUser
 
         const file = Array.isArray(files.gambar) ? files.gambar[0] : files.gambar
         const typedFile = file as FormidableFile
@@ -82,6 +84,7 @@ export async function POST(req: Request) {
           deskripsi,
           harga,
           gambar: imageUrl,
+          emailUser,
         })
 
         return resolve(NextResponse.json(newProduct, { status: 201 }))

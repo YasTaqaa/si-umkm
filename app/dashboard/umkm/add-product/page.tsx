@@ -1,15 +1,29 @@
 // app/dashboard/umkm/add-product/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, ImagePlus } from 'lucide-react'
+import { auth } from '@/lib/auth/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 export default function AddProductPage() {
   const router = useRouter()
   const [form, setForm] = useState({ nama: '', deskripsi: '', harga: '' })
   const [file, setFile] = useState<File | null>(null)
+  const [userEmail, setUserEmail] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.email) {
+        setUserEmail(user.email)
+      } else {
+        router.push('/login')
+      }
+    })
+    return () => unsubscribe()
+  }, [router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -29,6 +43,7 @@ export default function AddProductPage() {
     fd.append('nama', form.nama)
     fd.append('deskripsi', form.deskripsi)
     fd.append('harga', form.harga)
+    fd.append('emailUser', userEmail)
     if (file) fd.append('gambar', file)
 
     const res = await fetch('/api/rest/products', {
@@ -45,51 +60,55 @@ export default function AddProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-6 flex items-center justify-center">
-      <div className="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-2xl">
-        <h1 className="text-4xl font-bold text-green-700 mb-6 flex items-center gap-3">
-          <Save size={32} /> Tambah Produk UMKM
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-lg">
+        <h1 className="text-3xl md:text-4xl font-bold text-green-700 mb-6 flex items-center gap-2">
+          <Save size={28} /> Tambah Produk UMKM
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Nama Produk */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">Nama Produk</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
             <input
               name="nama"
               placeholder="Contoh: Keripik Pisang"
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 text-black px-4 py-2 rounded-xl shadow-sm transition"
+              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-100 rounded-lg px-4 py-2 transition outline-none"
             />
           </div>
 
+          {/* Deskripsi */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">Deskripsi Produk</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Produk</label>
             <textarea
               name="deskripsi"
               placeholder="Deskripsi singkat produk..."
+              rows={4}
               onChange={handleChange}
               required
-              rows={4}
-              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 text-black px-4 py-2 rounded-xl shadow-sm transition"
+              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-100 rounded-lg px-4 py-2 transition outline-none"
             />
           </div>
 
+          {/* Harga */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-1">Harga (Rp)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
             <input
               name="harga"
               type="number"
               placeholder="Contoh: 15000"
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 text-black px-4 py-2 rounded-xl shadow-sm transition"
+              className="w-full border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-100 rounded-lg px-4 py-2 transition outline-none"
             />
           </div>
 
+          {/* Gambar Produk */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-2 items-center gap-2">
-              <ImagePlus size={20} /> Gambar Produk
+            <label className="block text-sm font-medium text-gray-700 mb-1 items-center gap-2">
+              <ImagePlus size={18} /> Gambar Produk
             </label>
             <input
               type="file"
@@ -99,10 +118,11 @@ export default function AddProductPage() {
             />
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl shadow-md transition duration-300"
+            className="w-full bg-green-600 hover:bg-green-700 transition text-white font-semibold py-3 rounded-lg shadow-md"
           >
             {loading ? 'Menyimpan...' : 'Simpan Produk'}
           </button>
