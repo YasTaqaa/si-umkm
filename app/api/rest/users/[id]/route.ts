@@ -1,21 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // app/api/rest/users/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import UserModel from '@/models/user'
 import { connectDB } from '@/lib/db/connectDB'
+import UserModel from '@/models/user'
 
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
-  const { id } = context.params
+export const dynamic = 'force-dynamic' // opsional, jika perlu SSR/DB
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await params untuk Next.js 15
+  const { id } = await params
+  
   await connectDB()
-
+  
   try {
-    const user = await UserModel.findById(id).select('-password') // hindari expose password
+    const user = await UserModel.findById(id).select('-password')
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
     return NextResponse.json(user)
-  } catch (error) {
-    return NextResponse.json({ message: 'Error retrieving user' }, { status: 500 })
+  } catch (err) {
+    console.error('Error retrieving user:', err)
+    return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }

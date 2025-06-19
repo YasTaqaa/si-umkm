@@ -41,24 +41,6 @@ export default function TrainingsPage() {
     fetchTrainings()
   }, [])
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = confirm('Yakin ingin menghapus pelatihan ini?')
-    if (!confirmDelete) return
-
-    try {
-      const res = await fetch(`/api/rest/trainings/${id}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Gagal menghapus')
-
-      alert('Pelatihan berhasil dihapus')
-      fetchTrainings()
-    } catch (err) {
-      console.error('Gagal menghapus pelatihan:', err)
-      alert('Terjadi kesalahan saat menghapus pelatihan')
-    }
-  }
-
   return (
     <>
       <Navbar />
@@ -90,15 +72,7 @@ export default function TrainingsPage() {
                   key={item._id}
                   className="p-4 bg-white border rounded-xl shadow space-y-2"
                 >
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-green-800">{item.title}</h2>
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="text-red-600 hover:underline text-sm"
-                    >
-                      🗑 Hapus
-                    </button>
-                  </div>
+                  <h2 className="text-lg font-bold text-green-800">{item.title}</h2>
                   <p className="text-sm text-gray-700">{item.description}</p>
                   {embedUrl ? (
                     <div className="aspect-video">
